@@ -1,32 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-//
-/// \file B1DetectorConstruction.cc
-/// \brief Implementation of the B1DetectorConstruction class
-
 #include "B1DetectorConstruction.hh"
 
 #include "G4RunManager.hh"
@@ -36,30 +7,18 @@
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4RotationMatrix.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1DetectorConstruction::B1DetectorConstruction()
 : G4VUserDetectorConstruction(),
   fScoringVolume(0)
 { }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1DetectorConstruction::~B1DetectorConstruction()
 { }
 
-/*
-the beam pipe exit window is from havar alloy   8.3 g/cm3
-  Havar is composed of 42.0% (41-44%) of cobalt,
-                     19.5% (19-21%) of chromium,
-                     12.7% (12-14%) of nickel,
-                     2.7% (2.3-3.3%) of tungsten,
-                     2.2% (2-2.8%) of molybdenum,
-                     1.6% (1.35-1.8%) of manganese,
-                     0.2% (0.17-0.23%) of carbon,
-                     0.02-0.08% of beryllium, and balance of iron.
-*/
 
 G4VPhysicalVolume* B1DetectorConstruction::Construct()
 
@@ -121,6 +80,84 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                           0,
                           checkOverlaps);
 
+/*
+The beam pipe exit window is 55 micrometers  thick
+the beam pipe exit window is from havar alloy   8.3 g/cm3
+  Havar is composed of 42.0% (41-44%) of cobalt,
+                     19.5% (19-21%) of chromium,
+                     12.7% (12-14%) of nickel,
+                     2.7% (2.3-3.3%) of tungsten,
+                     2.2% (2-2.8%) of molybdenum,
+                     1.6% (1.35-1.8%) of manganese,
+                     0.2% (0.17-0.23%) of carbon,
+                     0.02-0.08% of beryllium, and balance of iron.
+*/
+
+    G4double densityHavar = 8300.* kg/m3;
+    std::vector<G4String> Havar_elm;
+    std::vector<G4double> Havar_weight;
+    G4double temperature = 300.; //K->0C 26.85 celsius
+    G4double pressure    = 10^5; //Pa
+
+    Havar_elm.push_back("Co");
+    Havar_elm.push_back("Cr");
+    Havar_elm.push_back("Ni");
+    Havar_elm.push_back("W");
+    Havar_elm.push_back("Mo");
+    Havar_elm.push_back("Mn");
+    Havar_elm.push_back("C");
+    Havar_elm.push_back("Be");
+    Havar_elm.push_back("Fe");
+
+    Havar_weight.push_back(0.420);
+    Havar_weight.push_back(0.195);
+    Havar_weight.push_back(0.127);
+    Havar_weight.push_back(0.027);
+    Havar_weight.push_back(0.022);
+    Havar_weight.push_back(0.016);
+    Havar_weight.push_back(0.002);
+    Havar_weight.push_back(0.0005);
+    Havar_weight.push_back(0.1905);
+
+    G4Material * HavarAlloy = nist->ConstructNewMaterial ("HavarAlloy",
+                                                           Havar_elm,
+                                                           Havar_weight,
+                                                           densityHavar,
+                                                           true,
+                                                           kStateSolid,
+                                                           temperature,
+                                                           pressure
+                                                         );
+
+    G4Material* HavarAlloy_mat = nist->FindOrBuildMaterial("HavarAlloy");
+
+    G4double thick  = 55.*um;
+    G4double radius = 1.5*mm;
+
+    /*G4Box* beamWindow =
+        new G4Box("beamWindow",
+                  thick,
+                  thick,
+                  thick
+        );*/
+    G4Tubs* beamWindow =
+        new G4Tubs ( "beamWindow", 0, radius, thick, 0.*deg, 360.*deg);
+
+    G4LogicalVolume* beamWindow_log =
+        new G4LogicalVolume(beamWindow, HavarAlloy_mat,"beamWindow_log"); //The beam pipe exit window
+
+    //Create a Physical Volume
+    G4double windowPos_x = 0.0*mm;
+    G4double windowPos_y = 0.0*mm;
+    G4double windowPos_z = -400.0*mm;
+
+    new G4PVPlacement(0 , // no rotation
+        G4ThreeVector(windowPos_x, windowPos_y, windowPos_z),
+                    beamWindow_log,
+                    "beamWindowPlace",
+                    logicWorld, //LOGICAL VOLUME
+                    false,
+                    0);
 
     //Create the ionization chamber
     G4double innerRadiusOfTheChamber   = 0.*mm;
@@ -191,7 +228,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
     PMMA_nbAtoms.push_back(6+2*polyPMMA);
     PMMA_nbAtoms.push_back(2);
 
-    G4Material* PMMA = nist->ConstructNewMaterial("PMMA",PMMA_elm,PMMA_nbAtoms, density=1190*kg/m3);
+    G4Material* PMMA     = nist->ConstructNewMaterial("PMMA",PMMA_elm,PMMA_nbAtoms, density=1190*kg/m3);
     G4Material* pmma_mat = nist->FindOrBuildMaterial("PMMA");
 
     /*G4Tubs* tracker_Chamber =
@@ -223,8 +260,14 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
     G4double chamberPos_y = 0.0*mm;
     G4double chamberPos_z = 1800.0*mm;
 
+    G4RotationMatrix *rotat = new G4RotationMatrix;
+    rotat->rotateX(90*deg);
+    rotat->rotateY(180*deg);
+    rotat->rotateZ(0*deg);
 
-    new G4PVPlacement(0, // no rotation
+
+
+    new G4PVPlacement(rotat, // rotation
         G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
                     pmma_log,
                     "pmmPlace",
@@ -232,7 +275,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     false,
                     0);
 
-    new G4PVPlacement(0, // no rotation
+    new G4PVPlacement(rotat, // rotation
         G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
                     graphite_log,
                     "graphitePlace",
@@ -240,7 +283,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     false,
                     0);
 
-    new G4PVPlacement(0, // no rotation
+    new G4PVPlacement(rotat, //rotation
         G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
                     air_log,
                     "airPlace",
@@ -248,7 +291,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     false,
                     0);
 
-    new G4PVPlacement(0, // no rotation
+    new G4PVPlacement(rotat, // no rotation
         G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
                     alRod_log,
                     "alRodPlace",
