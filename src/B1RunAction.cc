@@ -14,7 +14,9 @@
 
 B1RunAction::B1RunAction() : G4UserRunAction(),
   fEdep(0.),
-  fEdep2(0.)
+  fEdep2(0.),
+
+  hist(1000,0)
 {
   // add new units for dose
   //
@@ -47,6 +49,8 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
   // reset accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
+
+  for(size_t i = 0; i<100; i++){ hist[i]=0; }
 
 }
 
@@ -114,10 +118,27 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
      << "------------------------------------------------------------"
      << G4endl
      << G4endl;
-}
 
-void B1RunAction::AddEdep(G4double edep)
-{
+
+     G4cout << "Writing spectrum in spectrum.dat file..." << G4endl;
+     std::ofstream filed0("spectrum.dat", std::ios::trunc);
+     double bin_width = (HIST_MAX - HIST_MIN) / NOBINS;
+     for(int i = 0; i<NOBINS; i++){
+         double energy0 = i*bin_width + HIST_MIN;
+         filed0 << energy0 << " " << hist[i] << std::endl;
+     }
+     filed0.close();
+
+     G4cout << "Done!" << G4endl;
+ }
+
+void B1RunAction::AddEdep(G4double edep){
   fEdep  += edep;
   fEdep2 += edep*edep;
+}
+
+void B1RunAction::PutInHisto(G4double edep){
+    double bin_width = (HIST_MAX - HIST_MIN) / NOBINS;
+    int index0 = int(floor((edep-HIST_MIN)/bin_width/MeV)); //energy spread simulation is used
+    if(index0 > 0 && index0 < NOBINS){ hist[index0]++; }
 }

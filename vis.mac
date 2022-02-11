@@ -26,6 +26,8 @@
 # trajectories are established:
 /vis/viewer/set/autoRefresh false
 /vis/verbose errors
+#/vis/verbose 0
+
 #
 # Draw geometry:
 /vis/drawVolume
@@ -45,7 +47,7 @@
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
-# (if too many tracks cause core dump => /tracking/storeTrajectory 0)
+ #(if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # Draw hits at end of event:
 #/vis/scene/add/hits
@@ -101,12 +103,12 @@
 #
 # To get nice view
 # Make the "World" box invisible
-/vis/geometry/set/visibility World 0 false
+#/vis/geometry/set/visibility World 0 false
 # "Envelope" is transparent blue to represent water
 /vis/geometry/set/colour pmma_log 0 1 0 1 .3
 /vis/geometry/set/colour air_log 0 0 1 1 .3
 /vis/geometry/set/colour graphite_log 0 1 0 0 .3
-/vis/geometry/set/colour logicWorld 0 0 0 1 .1
+/vis/geometry/set/colour  World 0 0 0 1 .1
 /vis/geometry/set/colour source_log 0 1 0 0 .3
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenMarker true
@@ -114,7 +116,8 @@
 #
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
-/vis/verbose warnings
+/vis/verbose errors
+#/vis/verbose 0
 #
 # For file-based drivers, use this to create an empty detector view:
 #/vis/viewer/flush
