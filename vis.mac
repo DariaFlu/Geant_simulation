@@ -106,7 +106,8 @@
 /vis/geometry/set/colour pmma_log 0 1 0 1 .3
 /vis/geometry/set/colour air_log 0 0 1 1 .3
 /vis/geometry/set/colour graphite_log 0 1 0 0 .3
-/vis/geometry/set/colour Envelope 0 0 0 1 .1
+/vis/geometry/set/colour logicWorld 0 0 0 1 .1
+/vis/geometry/set/colour source_log 0 1 0 0 .3
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenMarker true
 /vis/viewer/set/viewpointThetaPhi 120 150

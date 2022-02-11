@@ -10,8 +10,7 @@
 #include "G4RotationMatrix.hh"
 
 
-B1DetectorConstruction::B1DetectorConstruction()
-: G4VUserDetectorConstruction(),
+B1DetectorConstruction::B1DetectorConstruction() : G4VUserDetectorConstruction(),
   fScoringVolume(0)
 { }
 
@@ -29,8 +28,8 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
     G4NistManager* nist = G4NistManager::Instance();
 
     // Envelope parameters
-    G4double env_sizeX = 100*mm, env_sizeY = 100*mm, env_sizeZ = 2000*mm;
-    G4Material* env_mat = nist->FindOrBuildMaterial("G4_AIR");
+    /*G4double env_sizeX = 100*mm, env_sizeY = 100*mm, env_sizeZ = 2000*mm;
+    G4Material* env_mat = nist->FindOrBuildMaterial("G4_AIR");*/
 
     // Option to switch on/off checking of volumes overlaps
     G4bool checkOverlaps = true;
@@ -44,7 +43,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
 
     G4Box* solidWorld =
         new G4Box("world_box",
-                    0.5*world_x, 0.5*world_y, 0.5*world_z);
+                    world_x, world_y, 0.5*world_z);
 
     G4LogicalVolume* logicWorld =
         new G4LogicalVolume(solidWorld,
@@ -62,9 +61,9 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                           checkOverlaps);
 
     // Envelope
-    G4Box* solidEnv =
+    /*G4Box* solidEnv =
         new G4Box("Envelope",
-                   0.5*env_sizeX, 0.5*env_sizeY, 0.5*env_sizeZ);
+                   env_sizeX, env_sizeY, 0.5*env_sizeZ);
 
     G4LogicalVolume* logicEnv =
         new G4LogicalVolume(solidEnv,
@@ -78,7 +77,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                           logicWorld,
                           false,
                           0,
-                          checkOverlaps);
+                          checkOverlaps);*/
 
 /*
 The beam pipe exit window is 55 micrometers  thick
@@ -132,7 +131,8 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4Material* HavarAlloy_mat = nist->FindOrBuildMaterial("HavarAlloy");
 
     G4double thick  = 55.*um;
-    G4double radius = 1.5*mm;
+    //G4double radius = 1.5*mm;
+    G4double radius = 50.*mm;
 
     /*G4Box* beamWindow =
         new G4Box("beamWindow",
@@ -159,6 +159,28 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
                     false,
                     0);
 
+//--------------THE PARTICLE SOURCE-------------------------------------
+    //the particles source
+    G4Material* source_mat = nist->FindOrBuildMaterial("G4_Galactic");
+
+   G4Box* source =
+        new G4Box("source",
+                  25.*mm,
+                  25.*mm,
+                  25.*mm
+                );
+    G4LogicalVolume* source_log =
+            new G4LogicalVolume(source, source_mat,"source_log"); //The logical volume for particles source
+
+    new G4PVPlacement(0 , // no rotation
+        G4ThreeVector(windowPos_x, windowPos_y, windowPos_z-25.),
+                source_log,
+                "sourcePlace",
+                logicWorld, //LOGICAL VOLUME
+                false,
+                0);
+
+//----------------------------------------------------------------------
     //Create the ionization chamber
     G4double innerRadiusOfTheChamber   = 0.*mm;
     G4double outerRadiusOfTheChamber   = 6.95*mm;
