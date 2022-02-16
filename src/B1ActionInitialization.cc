@@ -5,9 +5,7 @@
 #include "B1SteppingAction.hh"
 
 
-B1ActionInitialization::B1ActionInitialization()
- : G4VUserActionInitialization()
-{}
+B1ActionInitialization::B1ActionInitialization() : G4VUserActionInitialization() {}
 
 
 B1ActionInitialization::~B1ActionInitialization()

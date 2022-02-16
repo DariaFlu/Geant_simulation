@@ -10,13 +10,10 @@
 #include "G4RotationMatrix.hh"
 
 
-B1DetectorConstruction::B1DetectorConstruction() : G4VUserDetectorConstruction(),
-  fScoringVolume(0)
-{ }
+B1DetectorConstruction::B1DetectorConstruction() : G4VUserDetectorConstruction(),  fScoringVolume(0) { }
 
 
-B1DetectorConstruction::~B1DetectorConstruction()
-{ }
+B1DetectorConstruction::~B1DetectorConstruction() { }
 
 
 G4VPhysicalVolume* B1DetectorConstruction::Construct()
@@ -200,8 +197,8 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4double spanningAngleOfTheChamber = 360.*deg;
 
     G4Tubs* alRod =
-        new G4Tubs ("alRod",
-            innerRadiusOfTheChamber*0.5,
+        new G4Tubs ("alRod", 0,
+            //innerRadiusOfTheChamber*0.5,
             outerRadiusOfTheRod*0.5,
             hightOfTheRod*0.5,
             startAngleOfTheChamber,
@@ -209,8 +206,9 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4Material* alRod_mat = nist->FindOrBuildMaterial("G4_Al");
 
     G4Tubs* air =
-        new G4Tubs ("air",
-            innerRadiusOfTheChamber*0.5,
+        new G4Tubs ("air",0,
+            //outerRadiusOfTheRod*0.5,
+            //innerRadiusOfTheChamber*0.5,
             innerRadiusOfTheGraphite*0.5,
             hightOfAir*0.5,
             startAngleOfTheChamber,
@@ -219,8 +217,9 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4Material* air_mat = nist->FindOrBuildMaterial("G4_AIR");
 
     G4Tubs* graphite =
-        new G4Tubs ("graphite",
-            innerRadiusOfTheChamber*0.5,
+        new G4Tubs ("graphite",0,
+            //innerRadiusOfTheGraphite*0.5,
+            //innerRadiusOfTheChamber*0.5,
             outerRadiusOfTheGraphite*0.5,
             hightOfAir*0.5,
             startAngleOfTheChamber,
@@ -229,8 +228,9 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4Material* graphite_mat = nist->FindOrBuildMaterial("G4_GRAPHITE");
 
     G4Tubs* pmma =
-        new G4Tubs ("pmma",
-            innerRadiusOfTheChamber*0.5,
+        new G4Tubs ("pmma",0,
+            //outerRadiusOfTheGraphite*0.5,
+            //innerRadiusOfTheChamber*0.5,
             outerRadiusOfTheChamber*0.5,
             hightOfTheChamber*0.5,
             startAngleOfTheChamber,
@@ -283,9 +283,9 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     G4double chamberPos_z = 1800.0*mm;
 
     G4RotationMatrix *rotat = new G4RotationMatrix;
-    rotat->rotateX(90*deg);
-    rotat->rotateY(180*deg);
-    rotat->rotateZ(0*deg);
+    rotat->rotateX(0.*deg);
+    rotat->rotateY(90.*deg);
+    rotat->rotateZ(90.*deg);
 
 
 
@@ -297,27 +297,28 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
                     false,
                     0);
 
-    new G4PVPlacement(rotat, // rotation
-        G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
+    new G4PVPlacement(0, // rotation
+        G4ThreeVector(0,0,0),
                     graphite_log,
                     "graphitePlace",
-                    logicWorld, //LOGICAL VOLUME
+                    pmma_log, //LOGICAL VOLUME
                     false,
                     0);
 
-    new G4PVPlacement(rotat, //rotation
-        G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
+    new G4PVPlacement(0, //rotation
+        G4ThreeVector(0,0,0),
                     air_log,
                     "airPlace",
-                    logicWorld, //LOGICAL VOLUME
+                    graphite_log, //LOGICAL VOLUME
                     false,
                     0);
 
-    new G4PVPlacement(rotat, // no rotation
-        G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
+    new G4PVPlacement(0, // no rotation
+        //G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
+        G4ThreeVector(0,0,0),
                     alRod_log,
                     "alRodPlace",
-                    logicWorld, //LOGICAL VOLUME
+                    air_log, //LOGICAL VOLUME
                     false,
                     0);
 

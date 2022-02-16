@@ -16,7 +16,7 @@ B1RunAction::B1RunAction() : G4UserRunAction(),
   fEdep(0.),
   fEdep2(0.),
 
-  hist(1000,0)
+  hist(500,0)
 {
   // add new units for dose
   //
@@ -50,7 +50,7 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
 
-  for(size_t i = 0; i<100; i++){ hist[i]=0; }
+  for(size_t i = 0; i<500; i++){ hist[i]=0; }
 
 }
 
@@ -75,9 +75,11 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
   const B1DetectorConstruction* detectorConstruction
    = static_cast<const B1DetectorConstruction*>
      (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+
   G4double mass = detectorConstruction->GetScoringVolume()->GetMass();
   G4double dose = edep/mass;
   G4double rmsDose = rms/mass;
+
 
   // Run conditions
   //  note: There is no primary generator action object for "master"
