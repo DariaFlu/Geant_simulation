@@ -39,7 +39,7 @@ class B1RunAction : public G4UserRunAction
     std::vector<G4double> hist;
     G4double HIST_MIN = 0.;
     G4double HIST_MAX = 36.;
-    G4int NOBINS = 500;
+    G4int NOBINS = 1000;
 
 };
 
