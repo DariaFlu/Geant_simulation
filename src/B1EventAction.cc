@@ -23,9 +23,11 @@ void B1EventAction::BeginOfEventAction(const G4Event*)
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {
+      std::cout << 0 << std::endl;
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
   fRunAction->PutInHisto(fEdep);
-  std::cout << fEdep << std::endl;
+  std::cout << 0 << std::endl;
+  //std::cout << fEdep << std::endl;
 
 }

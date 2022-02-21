@@ -9,8 +9,15 @@
 #include "G4SystemOfUnits.hh"
 #include "G4RotationMatrix.hh"
 
+#include <string>
+#include <vector>
 
-B1DetectorConstruction::B1DetectorConstruction() : G4VUserDetectorConstruction(),  fScoringVolume(0) { }
+B1DetectorConstruction::B1DetectorConstruction()
+: G4VUserDetectorConstruction(),
+fScoringVolume(0),
+vLayers(0)
+//NofLayers(-1)
+{ }
 
 
 B1DetectorConstruction::~B1DetectorConstruction() { }
@@ -20,6 +27,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
 
 
 {
+    //fNofLayers = 1;
 
     // Get nist material manager
     G4NistManager* nist = G4NistManager::Instance();
@@ -160,7 +168,7 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     //the particles source
     G4Material* source_mat = nist->FindOrBuildMaterial("G4_Galactic");
 
-   G4Box* source =
+    G4Box* source =
         new G4Box("source",
                   25.*mm,
                   25.*mm,
@@ -178,7 +186,9 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
                 0);
 
 //----------------------------------------------------------------------
-    //Create the ionization chamber
+
+//---------------Create the ionization chamber---------------------------
+
     G4double innerRadiusOfTheChamber   = 0.*mm;
     G4double outerRadiusOfTheChamber   = 6.95*mm;
     G4double hightOfTheChamber         = 23.6*mm;
@@ -287,8 +297,6 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     rotat->rotateY(90.*deg);
     rotat->rotateZ(90.*deg);
 
-
-
     new G4PVPlacement(rotat, // rotation
         G4ThreeVector(chamberPos_x*0.5, chamberPos_y*0.5, chamberPos_z*0.5),
                     pmma_log,
@@ -321,7 +329,107 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
                     air_log, //LOGICAL VOLUME
                     false,
                     0);
+//----------------------------------------------------------------------
+
+//--------------THE BOX IN FRONT OF CHAMBER------------------------------
+    //the particles source
+    G4Material* frontChamber_mat = nist->FindOrBuildMaterial("G4_Galactic");
+
+    G4Box* frontChamber =
+        new G4Box("source",
+                  50.*mm,
+                  50.*mm,
+                  1. *um
+                );
+    G4LogicalVolume* frontChamber_log =
+            new G4LogicalVolume(frontChamber, frontChamber_mat,"frontChamber_log"); //The logical volume for particles source
+
+    new G4PVPlacement(0 , // no rotation
+        G4ThreeVector(chamberPos_x, chamberPos_y, chamberPos_z*0.5-outerRadiusOfTheChamber*0.5),
+                frontChamber_log,
+                "frontChamberPlace",
+                logicWorld, //LOGICAL VOLUME
+                false,
+                0);
+
+//----------------------------------------------------------------------
+
+
+//------------------------Geometry parameters for layers-----------------
+/*
+  fNofLayers = 100;
+  G4double layerThickness = 1.3*mm;
+
+  auto calorThickness = fNofLayers * layerThickness;
+
+  vector<G4double> layersSD;
+  G4Material* sd_mat = nist->FindOrBuildMaterial("G4_AIR");
+
+ G4Box* sd =
+      new G4Box("SensitiveDetectorEnergy",
+                *mm,
+                *mm,
+                *mm
+              );
+  G4LogicalVolume* sd_log =
+          new G4LogicalVolume(sd, sd_mat,"sd_log"); //The logical volume for particles source
+
+  new G4PVPlacement(0 , // no rotation
+      G4ThreeVector(windowPos_x, windowPos_y, windowPos_z-25.),
+              sd_log,
+              "sdPlace",
+              logicWorld, //LOGICAL VOLUME
+              false,
+              0);
+*/
+/*
+  if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial ) {
+  G4ExceptionDescription msg;
+  msg << "Cannot retrieve materials already defined.";
+  G4Exception("B4DetectorConstruction::DefineVolumes()",
+    "MyCode0001", FatalException, msg);
+  }
+*/
+//----------------------------------------------------------------------
+
+    G4double fNofLayers = 100;
+    G4double Zval = 8*mm;
+
+    G4double dist = 0;
+    //NEED TO CHANGE DIST FROM WORLD CENTER TO SOURCE
+
+    G4double detX = 100.*mm;
+    G4double detY = 100.*mm;
+    G4double detZ = Zval;
+
+    std::vector<G4VPhysicalVolume*> pv;
+
+    G4Box* solidDet = new G4Box("Det",
+                           0.5*detX, 0.5*detY, 0.5*detZ);
+
+    for (int i = 1; i <= fNofLayers; i++){
+
+        std::string it = std::to_string(i);
+        G4LogicalVolume* logicDet =
+            new G4LogicalVolume(solidDet, air_mat, std::to_string(i));
+        vLayers.push_back(logicDet);
+
+
+        G4VPhysicalVolume* physDet =
+        new G4PVPlacement(0,
+                          G4ThreeVector(0., 0., dist),
+                          vLayers[i-1],
+                          std::to_string(i),
+                          logicWorld,
+                          false,
+                          0,
+                          1);
+        pv.push_back(physDet);
+
+        dist += detZ;
+    }
 
     fScoringVolume = air_log;
+
     return physWorld;
 }

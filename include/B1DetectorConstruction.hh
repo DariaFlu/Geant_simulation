@@ -21,6 +21,7 @@ class B1DetectorConstruction : public G4VUserDetectorConstruction
 
   protected:
     G4LogicalVolume*  fScoringVolume;
+    std::vector<G4LogicalVolume*> vLayers;
 };
 
 

@@ -11,11 +11,13 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
+#include <vector>
+
 
 B1RunAction::B1RunAction() : G4UserRunAction(),
   fEdep(0.),
   fEdep2(0.),
-
+  fNofLayers(100),
   hist(500,0)
 {
   // add new units for dose
@@ -34,6 +36,7 @@ B1RunAction::B1RunAction() : G4UserRunAction(),
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->RegisterAccumulable(fEdep);
   accumulableManager->RegisterAccumulable(fEdep2);
+  vDepoEnr_run.resize(fNofLayers, 0.);
 }
 
 
@@ -80,12 +83,16 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
   G4double dose = edep/mass;
   G4double rmsDose = rms/mass;
 
+  //EnergyDeposit * toten2 =
+  //G4double totalEnergy = edep;
+
+ // G4cout<<"Total energy deposed in chamber: "<<edep<<G4endl;
 
   // Run conditions
   //  note: There is no primary generator action object for "master"
   //        run manager for multi-threaded mode.
   const B1PrimaryGeneratorAction* generatorAction
-   = static_cast<const B1PrimaryGeneratorAction*>
+        = static_cast<const B1PrimaryGeneratorAction*>
      (G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction());
   G4String runCondition;
   if (generatorAction)
@@ -128,6 +135,15 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
      for(int i = 0; i<NOBINS; i++){
          double energy0 = i*bin_width + HIST_MIN;
          filed0 << energy0 << " " << hist[i] << std::endl;
+     }
+     filed0.close();
+
+     G4cout << "Writing spectrum in layers.dat file..." << G4endl;
+     std::ofstream filed1("layers.dat", std::ios::trunc);
+     //double bin_width = (HIST_MAX - HIST_MIN) / NOBINS;
+     for(int i = 0; i<fNofLayers; i++){
+         //double energy0 = i*bin_width + HIST_MIN;
+         filed1 << i << " " << vDepoEnr_run[i]/MeV/nofEvents << std::endl;
      }
      filed0.close();
 

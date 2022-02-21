@@ -31,6 +31,8 @@ class B1RunAction : public G4UserRunAction
 
     void AddEdep (G4double edep);
     void PutInHisto(G4double edep);
+    std::vector<G4double> vDepoEnr_run ;
+    G4int nEvents = 0;
 
   private:
     std::vector<G4double> hist;
@@ -40,7 +42,7 @@ class B1RunAction : public G4UserRunAction
 
     G4Accumulable<G4double> fEdep;
     G4Accumulable<G4double> fEdep2;
-
+    G4int fNofLayers;
 
 
 };
