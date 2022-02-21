@@ -15,10 +15,12 @@
 
 
 B1RunAction::B1RunAction() : G4UserRunAction(),
-  fEdep(0.),
-  fEdep2(0.),
-  fNofLayers(100),
-  hist(500,0)
+  fEdep(0.),  //Step is used for ionization chamber
+  fEdep2(0.), //Step2 is used for ionization chamber
+  fEbef(0.), //The energy before proton hitting chamber
+  fNofLayers(100), //Number of layers
+  hist(500,0) //histogram
+
 {
   // add new units for dose
   //
@@ -54,7 +56,9 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
   accumulableManager->Reset();
 
   for(size_t i = 0; i<500; i++){ hist[i]=0; }
-
+    vDepoEnr_run.resize(fNofLayers, 0.);
+  fEbef = 0.;
+  nHitFCBef = 0;
 }
 
 
@@ -82,11 +86,6 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
   G4double mass = detectorConstruction->GetScoringVolume()->GetMass();
   G4double dose = edep/mass;
   G4double rmsDose = rms/mass;
-
-  //EnergyDeposit * toten2 =
-  //G4double totalEnergy = edep;
-
- // G4cout<<"Total energy deposed in chamber: "<<edep<<G4endl;
 
   // Run conditions
   //  note: There is no primary generator action object for "master"
@@ -145,7 +144,9 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
          //double energy0 = i*bin_width + HIST_MIN;
          filed1 << i << " " << vDepoEnr_run[i]/MeV/nofEvents << std::endl;
      }
-     filed0.close();
+     filed1.close();
+
+     G4cout<<"Energy before chamber: " <<fEbef/MeV/nHitFCBef<<G4endl;
 
      G4cout << "Done!" << G4endl;
  }

@@ -34,6 +34,9 @@ class B1RunAction : public G4UserRunAction
     std::vector<G4double> vDepoEnr_run ;
     G4int nEvents = 0;
 
+    G4double fEbef = 0.;
+    G4int nHitFCBef = 0;
+
   private:
     std::vector<G4double> hist;
     G4double HIST_MIN = 0.;

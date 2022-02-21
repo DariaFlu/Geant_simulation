@@ -20,6 +20,7 @@ class B1EventAction : public G4UserEventAction
     virtual void EndOfEventAction(const G4Event* event);
 
     void AddEdep(G4double edep) { fEdep += edep; }
+    bool isFirstHitInFC;
 
   private:
     B1RunAction* fRunAction;

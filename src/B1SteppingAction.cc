@@ -48,6 +48,21 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
         //std::cout << DepEnr << std::endl;
     }
 
+    G4LogicalVolume* frontChamberV =
+      step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume();
+      const B1DetectorConstruction* detectorConstruction
+              = static_cast<const B1DetectorConstruction*>
+          (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+          G4LogicalVolume* FCVol = detectorConstruction->GetFrontChVolume();
+
+    if(frontChamberV == FCVol && !(fEventAction->isFirstHitInFC)){
+        G4double energ = step->GetPreStepPoint()->GetKineticEnergy();
+        fRunAction->fEbef += energ;
+        //G4cout<<"Energy before: "<<energ<<G4endl;
+        (fEventAction->isFirstHitInFC) = true;
+        (fRunAction->nHitFCBef)++;
+    }
+
     // get volume of the current step
     G4LogicalVolume* volume =
       step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume();

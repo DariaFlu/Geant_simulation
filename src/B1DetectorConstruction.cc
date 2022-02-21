@@ -14,8 +14,9 @@
 
 B1DetectorConstruction::B1DetectorConstruction()
 : G4VUserDetectorConstruction(),
-fScoringVolume(0),
-vLayers(0)
+fScoringVolume(0),//ionization chamber
+fFrontChVolume(0), //front chamber
+vLayers(0) //Layers for proccesing  of ionization losses
 //NofLayers(-1)
 { }
 
@@ -64,25 +65,6 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                           false,
                           0,
                           checkOverlaps);
-
-    // Envelope
-    /*G4Box* solidEnv =
-        new G4Box("Envelope",
-                   env_sizeX, env_sizeY, 0.5*env_sizeZ);
-
-    G4LogicalVolume* logicEnv =
-        new G4LogicalVolume(solidEnv,
-                            env_mat,
-                            "Envelope");
-
-        new G4PVPlacement(0,
-                          G4ThreeVector(),
-                          logicEnv,
-                          "Envelope",
-                          logicWorld,
-                          false,
-                          0,
-                          checkOverlaps);*/
 
 /*
 The beam pipe exit window is 55 micrometers  thick
@@ -135,18 +117,14 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
 
     G4Material* HavarAlloy_mat = nist->FindOrBuildMaterial("HavarAlloy");
 
+//--------------Create beam exit window------------------------------------
+
     G4double thick  = 55.*um;
     //G4double radius = 1.5*mm;
     G4double radius = 50.*mm;
 
-    /*G4Box* beamWindow =
-        new G4Box("beamWindow",
-                  thick,
-                  thick,
-                  thick
-        );*/
     G4Tubs* beamWindow =
-        new G4Tubs ( "beamWindow", 0, radius, thick, 0.*deg, 360.*deg);
+        new G4Tubs ( "beamWindow", 0, radius, thick*0.5, 0.*deg, 360.*deg);
 
     G4LogicalVolume* beamWindow_log =
         new G4LogicalVolume(beamWindow, HavarAlloy_mat,"beamWindow_log"); //The beam pipe exit window
@@ -163,6 +141,8 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
                     logicWorld, //LOGICAL VOLUME
                     false,
                     0);
+//----------------------------------------------------------------------
+
 
 //--------------THE PARTICLE SOURCE-------------------------------------
     //the particles source
@@ -332,14 +312,14 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
 //----------------------------------------------------------------------
 
 //--------------THE BOX IN FRONT OF CHAMBER------------------------------
-    //the particles source
+
     G4Material* frontChamber_mat = nist->FindOrBuildMaterial("G4_Galactic");
 
     G4Box* frontChamber =
         new G4Box("source",
                   50.*mm,
                   50.*mm,
-                  1. *um
+                  1. *nm
                 );
     G4LogicalVolume* frontChamber_log =
             new G4LogicalVolume(frontChamber, frontChamber_mat,"frontChamber_log"); //The logical volume for particles source
@@ -355,47 +335,12 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
 //----------------------------------------------------------------------
 
 
-//------------------------Geometry parameters for layers-----------------
-/*
-  fNofLayers = 100;
-  G4double layerThickness = 1.3*mm;
-
-  auto calorThickness = fNofLayers * layerThickness;
-
-  vector<G4double> layersSD;
-  G4Material* sd_mat = nist->FindOrBuildMaterial("G4_AIR");
-
- G4Box* sd =
-      new G4Box("SensitiveDetectorEnergy",
-                *mm,
-                *mm,
-                *mm
-              );
-  G4LogicalVolume* sd_log =
-          new G4LogicalVolume(sd, sd_mat,"sd_log"); //The logical volume for particles source
-
-  new G4PVPlacement(0 , // no rotation
-      G4ThreeVector(windowPos_x, windowPos_y, windowPos_z-25.),
-              sd_log,
-              "sdPlace",
-              logicWorld, //LOGICAL VOLUME
-              false,
-              0);
-*/
-/*
-  if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial ) {
-  G4ExceptionDescription msg;
-  msg << "Cannot retrieve materials already defined.";
-  G4Exception("B4DetectorConstruction::DefineVolumes()",
-    "MyCode0001", FatalException, msg);
-  }
-*/
 //----------------------------------------------------------------------
 
     G4double fNofLayers = 100;
-    G4double Zval = 8*mm;
+    G4double Zval = 12.9*mm;
 
-    G4double dist = 0;
+    G4double dist = windowPos_z+thick*0.5+Zval*0.5;
     //NEED TO CHANGE DIST FROM WORLD CENTER TO SOURCE
 
     G4double detX = 100.*mm;
@@ -430,6 +375,7 @@ the beam pipe exit window is from havar alloy   8.3 g/cm3
     }
 
     fScoringVolume = air_log;
+    fFrontChVolume = frontChamber_log;
 
     return physWorld;
 }

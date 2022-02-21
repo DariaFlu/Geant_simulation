@@ -7,7 +7,8 @@
 
 B1EventAction::B1EventAction(B1RunAction* runAction) : G4UserEventAction(),
   fRunAction(runAction),
-  fEdep(0.)
+  fEdep(0.),
+  isFirstHitInFC(false)
 {}
 
 
@@ -17,17 +18,19 @@ B1EventAction::~B1EventAction()
 
 void B1EventAction::BeginOfEventAction(const G4Event*)
 {
+    isFirstHitInFC = false;
   fEdep = 0.;
 }
 
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {
-      std::cout << 0 << std::endl;
+//      std::cout << 0 << std::endl;
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
   fRunAction->PutInHisto(fEdep);
-  std::cout << 0 << std::endl;
+//  std::cout << 0 << std::endl;
   //std::cout << fEdep << std::endl;
+
 
 }

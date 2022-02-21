@@ -18,9 +18,11 @@ class B1DetectorConstruction : public G4VUserDetectorConstruction
     virtual G4VPhysicalVolume* Construct();
 
     G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+    G4LogicalVolume* GetFrontChVolume() const {return fFrontChVolume;}
 
   protected:
     G4LogicalVolume*  fScoringVolume;
+    G4LogicalVolume* fFrontChVolume;
     std::vector<G4LogicalVolume*> vLayers;
 };
 
