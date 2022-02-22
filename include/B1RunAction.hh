@@ -36,11 +36,12 @@ class B1RunAction : public G4UserRunAction
 
     G4double fEbef = 0.;
     G4int nHitFCBef = 0;
+    G4double ftotEnerg = 0;
 
   private:
     std::vector<G4double> hist;
     G4double HIST_MIN = 0.;
-    G4double HIST_MAX = 36.;
+    G4double HIST_MAX = 100.;
     G4int NOBINS = 500;
 
     G4Accumulable<G4double> fEdep;

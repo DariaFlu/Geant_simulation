@@ -19,8 +19,8 @@ B1RunAction::B1RunAction() : G4UserRunAction(),
   fEdep2(0.), //Step2 is used for ionization chamber
   fEbef(0.), //The energy before proton hitting chamber
   fNofLayers(100), //Number of layers
-  hist(500,0) //histogram
-
+  hist(500,0), //histogram
+  ftotEnerg(0.)
 {
   // add new units for dose
   //
@@ -50,7 +50,7 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
 {
   // inform the runManager to save random number seed
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
-
+  ftotEnerg = 0.;
   // reset accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
@@ -147,7 +147,7 @@ void B1RunAction::EndOfRunAction(const G4Run* run)
      filed1.close();
 
      G4cout<<"Energy before chamber: " <<fEbef/MeV/nHitFCBef<<G4endl;
-
+     G4cout<<"Total energy in chamber: " <<ftotEnerg/MeV/nHitFCBef<<G4endl;
      G4cout << "Done!" << G4endl;
  }
 
@@ -158,6 +158,7 @@ void B1RunAction::AddEdep(G4double edep){
 
 void B1RunAction::PutInHisto(G4double edep){
     double bin_width = (HIST_MAX - HIST_MIN) / NOBINS;
-    int index0 = int(floor((edep-HIST_MIN)/bin_width/MeV)); //energy spread simulation is used
+    int index0 = int(floor((edep-HIST_MIN)/bin_width/keV)); //energy spread simulation is used
     if(index0 > 0 && index0 < NOBINS){ hist[index0]++; }
+    ftotEnerg+=edep;
 }
